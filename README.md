@@ -8,7 +8,7 @@
 % brew install orbstack
 ```
 * Install [GitHub Desktop for Mac](https://github.com/apps/desktop)
-* File | Clone Repository: ```https://github.com/danielpoon/wordpress-nginx-ssl-cloudflare-docker.git```
+* File | Clone Repository | URL: ```https://github.com/danielpoon/wordpress-nginx-ssl-cloudflare-docker.git```
 * In a terminal:
 ```
 % cd ~/Documents/GitHub/wordpress-nginx-ssl-cloudflare-docker
@@ -37,7 +37,8 @@ Notes on deploying a single site [WordPress FPM Edition](https://hub.docker.com/
 
 - [Overview](#overview)
     - [Host requirements](#reqts)
-- [Configuration](#config)
+- [Cloudflare Configuration](#cloudflare)
+- [Local Configuration](#config)
 - [Deploy](#deploy)
 - [WordPress Plugin](#plugin)
 - [Adminer](#adminer)
@@ -52,9 +53,11 @@ WordPress is a free and open source blogging tool and a content management syste
 This variant contains PHP-FPM, which is a FastCGI implementation for PHP. 
 
 - See the [PHP-FPM website](https://php-fpm.org/) for more information about PHP-FPM.
-- In order to use this image variant, some kind of reverse proxy (such as NGINX, Apache, or other tool which speaks the FastCGI protocol) will be required.
+- In order to use this image variant, some kind of reverse proxy (such as NGINX, Apache, or other tool which speaks the FastCGI protocol) will be required. As such Nginx will be part of the install.
 
 ### <a name="reqts"></a>Host requirements
+
+This is what you need on your MacOS machine:
 
 * Install [HomeBrew](https://brew.sh)
 * Install OrbStack. Orbstack is a faster & better version of Docker on MacOS
@@ -62,9 +65,21 @@ This variant contains PHP-FPM, which is a FastCGI implementation for PHP.
 % brew install orbstack
 ```
 * Install [GitHub Desktop for Mac](https://github.com/apps/desktop)
-  
 
-## <a name="config"></a>Configuration
+## <a name="cloudflare"></a>Cloudflare Configuration
+
+Using Cloudflare Tunnel, you can self-host WordPress without using providers such as Digital Ocean. Here's the high level steps:
+
+1. Go buy a domain e.g. danielpoon.com and set it up to point to Cloudflare
+2. Access CloudFlare's Zero Trust dashboard to start creating a **Networks | Tunnel**
+3. Select Cloudflared and enter a new tunnel name then Save it. Next click the 3 dots next to the new tunnel to **Configure**. Choose Docker in the environment as the connector. Copy and note down the **token string e.g. eyJhIjoiO… ** as you will be putting this into the .env file later
+4. Click on the Public Hostname tab and 'Add a Public Hostname'. Enter a subdomain and domain. Then choose 'HTTPS' as type, and 127.0.0.1 as URL
+5. In the Additional application settings choose TLS | No TLS Verify, turn it ON
+
+For now the tunnel may have status as DOWN but don't worry, once you paste the token into the .env file (below) and you spin up the containers, the status will turn to HEALTHY.
+
+
+## <a name="config"></a>Local Configuration
 
 Copy the `env.template` file as `.env` and populate according to your environment. Make sure you enter your CloudFlare token.
 
@@ -261,6 +276,14 @@ Complete the initial WordPress installation process, and when completed you shou
 
 ![](./imgs/WP-dashboard.png)
 ![](./imgs/WP-view-site.png)
+
+
+# Additional Setup
+
+1. Test the tunneled URL and see if it works: https://subdomain.danielpoon.com
+2. Go into the WordPress panel https://127.0.0.1/wp-admin and select Settings | General and replace the two URL fields to https://subdomain.danielpoon.com. Be cautious because if you get the URL wrong, it will be a long process to correct this, because WordPress can no longer point to the site.
+3. Last but not least, you can also go into the Cloudflare dashboard (not Zero Trust), and use the Bulk Redirect option to get http://subdomain.danielpoon.com to redirect to https://subdomain.danielpoon.com
+4. Furthermore, you can also use the Zero Trust to grant Access | Applications | Add an application | Self Hosted, in order to further restrict access to your self-hosted website. For example if you choose Email as the method, users will only be able to access it via a 2FA code sent to the designated email address. This makes it super secure for private websites such as NAS login page or other personal apps.
 
 
 # <a name="plugin"></a> Wordpress Plugins
