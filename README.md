@@ -1,5 +1,4 @@
-# WordPress on Docker / Nginx / Cloudflare 
-# Self-Hosted for MacOS M Series
+# WordPress on Docker / Nginx / Cloudflare Self-Hosted for MacOS M Series
 
 ## Quick Start
 
@@ -258,6 +257,28 @@ Complete the initial WordPress installation process, and when completed you shou
 
 ![](./imgs/WP-dashboard.png)
 ![](./imgs/WP-view-site.png)
+
+
+# Wordpress Plugins
+
+After your install, you can add your themes and plugins. Some of the plugins that I am using:
+
+- Backup Migration - free backup/migration for sites < 2Gb in export size
+- Classic Widgets with Block-based Widgets - easier for WP widget manipulation
+- Download plugin - to download plugin as files for archive. I archived some WP plugins in zip format for safety reason. 
+  https://wordpress.org/plugins/download-plugin/
+- Embed PDF viewer
+- Falcon - WP optimization and tweaks
+- Fonts Plugin - change base font
+- Login with Ajax - allow login to redirect to blog home page or custom page
+- LoginPress - customize login page
+- Pheonix Media Rename
+- Print My Blog
+- Smush Image Optimization - Image upload and optimize current objects
+- WP Extended Search
+- WP File Manager - able to view, archive, delete files I don't normally get to see in the front end e.g. staled plugin folders
+- WP-Optimize - Clean Compress Cache
+
 
 ## <a name="adminer"></a>Adminer
 
