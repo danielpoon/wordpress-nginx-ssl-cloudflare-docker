@@ -40,6 +40,7 @@ Notes on deploying a single site [WordPress FPM Edition](https://hub.docker.com/
 - [Cloudflare Configuration](#cloudflare)
 - [Local Configuration](#config)
 - [Deploy](#deploy)
+- [Additional Setup](#additional)
 - [WordPress Plugin](#plugin)
 - [Adminer](#adminer)
 - [Teardown](#teardown)
@@ -278,7 +279,7 @@ Complete the initial WordPress installation process, and when completed you shou
 ![](./imgs/WP-view-site.png)
 
 
-# Additional Setup
+# <a name="additional"></a>Additional Setup
 
 1. Test the tunneled URL and see if it works: https://subdomain.danielpoon.com
 2. Go into the WordPress panel https://127.0.0.1/wp-admin and select Settings | General and replace the two URL fields to https://subdomain.danielpoon.com. Be cautious because if you get the URL wrong, it will be a long process to correct this, because WordPress can no longer point to the site.
