@@ -39,6 +39,7 @@ Notes on deploying a single site [WordPress FPM Edition](https://hub.docker.com/
     - [Host requirements](#reqts)
 - [Configuration](#config)
 - [Deploy](#deploy)
+- [WordPress Plugin](#plugin)
 - [Adminer](#adminer)
 - [Teardown](#teardown)
 - [References](#references)
@@ -259,7 +260,7 @@ Complete the initial WordPress installation process, and when completed you shou
 ![](./imgs/WP-view-site.png)
 
 
-# Wordpress Plugins
+# <a name="plugin"></a> Wordpress Plugins
 
 After your install, you can add your themes and plugins. Some of the plugins that I am using:
 
