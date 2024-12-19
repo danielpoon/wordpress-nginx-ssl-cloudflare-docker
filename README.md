@@ -21,6 +21,8 @@
 ```
 % sh ./start.sh
 ```
+That's it. You should be able to test it with https://127.0.0.1
+
 
 ## The Detail
 
