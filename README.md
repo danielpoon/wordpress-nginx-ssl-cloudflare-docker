@@ -1,5 +1,5 @@
 # WordPress on Docker / Nginx / Cloudflare 
-###(Self-Hosted for MacOS M Series)
+### (Self-Hosted for MacOS M Series)
 
 
 ## Quick Start
