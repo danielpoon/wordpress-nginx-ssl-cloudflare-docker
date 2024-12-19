@@ -2,6 +2,9 @@ services:
 
   wordpress:
     # default port 9000 (FastCGI)
+    build:
+      context: .
+      dockerfile: ./dockerfile
     image: dpoon-wordpress:1.0
     container_name: wp-wordpress
     env_file:
