@@ -6,15 +6,14 @@ services:
     container_name: wp-wordpress
     env_file:
       - .env
-    restart: unless-stopped
+    restart: always
     networks:
-      - wordpress
+      - app-network
     depends_on:
       - database
     volumes:
       - ${WORDPRESS_LOCAL_HOME}:/var/www/html
       - ${WORDPRESS_UPLOADS_CONFIG}:/usr/local/etc/php/conf.d/uploads.ini
-      # - /path/to/repo/myTheme/:/var/www/html/wp-content/themes/myTheme
     environment:
       - WORDPRESS_DB_HOST=${WORDPRESS_DB_HOST}
       - WORDPRESS_DB_NAME=${WORDPRESS_DB_NAME}
@@ -27,9 +26,9 @@ services:
     container_name: wp-database
     env_file:
       - .env
-    restart: unless-stopped
+    restart: always
     networks:
-      - wordpress
+      - app-network
     environment:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
@@ -43,13 +42,14 @@ services:
 
   nginx:
     # default ports 80, 443 - expose mapping as needed to host
-    image: nginx:1.26
+    #image: nginx:1.26
+    image: nginx:1.27.3-alpine-slim
     container_name: wp-nginx
     env_file:
       - .env
-    restart: unless-stopped
+    restart: always
     networks:
-      - wordpress
+      - app-network
     depends_on:
       - wordpress
     ports:
@@ -68,7 +68,7 @@ services:
 #    container_name: wp-adminer
 #    restart: unless-stopped
 #    networks:
-#      - wordpress
+#      - app-network
 #    depends_on:
 #      - database
 #    ports:
@@ -81,7 +81,12 @@ services:
     command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
     network_mode: host
 
+  volumes:
+    ${MYSQL_LOCAL_HOME}: {}
+    ${WORDPRESS_LOCAL_HOME}: {}
+    ${NGINX_CONF}: {}
+
 networks:
-  wordpress:
-    name: wp-wordpress
+  app-network:
+    name: app-network
     driver: bridge
