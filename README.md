@@ -1,12 +1,34 @@
-# WordPress on Docker / Nginx / Cloudflare Self Hosted
+# WordPress on Docker / Nginx / Cloudflare Self-Hosted for MacOS M Series
+
+## Quick Start
+
+* Install ([HomeBrew]([https://letsencrypt.org/docs/certificates-for-localhost/](https://brew.sh)) 
+* Install OrbStack. This is a faster & better version of Docker on MacOS
+```
+% brew install orbstack
+```
+* Install ([GitHub Desktop for Mac](https://github.com/apps/desktop)) 
+* File | Clone Repository: ([This](https://github.com/danielpoon/wordpress-nginx-ssl-cloudflare-docker.git))
+* In a terminal:
+```
+% cd ~/Documents/GitHub/wordpress-nginx-ssl-cloudflare-docker
+% cp env.template .env
+```
+* Edit the .env file ```% nano .env```
+* Build and start the containers
+```
+% sh ./start.sh
+```
+## The Detail
 
 Notes on deploying a single site [WordPress FPM Edition](https://hub.docker.com/_/wordpress/) instance as a docker deployment orchestrated by Docker Compose.
 
-- Use the FPM version of WordPress (WP 6.7.1 FPM on Alpine)
-- Use MySQL as the database (v8.4)
-- Use Nginx as the web server (v1.26)
+- Use the FPM version of WordPress (WP 6.7.1 FPM on Alpine, small footprint without apache, latest as of December 18th, 2024)
+- Use MySQL as the database (v8.4.3)
+- Use Nginx as the web server (v1.27.3) to map http://wordpress:9000 to https://wordpress, and act as reverse proxy
 - Use Adminer as the database management tool (v4)
 - Include self-signed SSL certificate ([Let's Encrypt localhost](https://letsencrypt.org/docs/certificates-for-localhost/) format)
+- Use Cloudflared Tunnel to allow self hosting
 
 **DISCLAIMER: The code herein may not be up to date nor compliant with the most recent package and/or security notices. The frequency at which this code is reviewed and updated is based solely on the lifecycle of the project for which it was written to support, and is not actively maintained outside of that scope. Use at your own risk.**
 
@@ -39,7 +61,7 @@ Both Docker and Docker Compose are required on the host to run this code
 
 ## <a name="config"></a>Configuration
 
-Copy the `env.template` file as `.env` and populate according to your environment
+Copy the `env.template` file as `.env` and populate according to your environment. Make sure you enter your CloudFlare token.
 
 ```ini
 # docker-compose environment file
@@ -53,8 +75,11 @@ Copy the `env.template` file as `.env` and populate according to your environmen
 #  4. Dockerfile
 #  5. Variable is not defined
 
+# Cloudflare Token
+CLOUDFLARE_TUNNEL_TOKEN=<YOUR CLOUDFLARE TUNNEL TOKEN>
+
 # Wordpress Settings
-export WORDPRESS_LOCAL_HOME=./wordpress
+export WORDPRESS_LOCAL_HOME=./data-wordpress
 export WORDPRESS_UPLOADS_CONFIG=./config/uploads.ini
 export WORDPRESS_DB_HOST=database:3306
 export WORDPRESS_DB_NAME=wordpress
@@ -62,7 +87,7 @@ export WORDPRESS_DB_USER=wordpress
 export WORDPRESS_DB_PASSWORD=password123!
 
 # MySQL Settings
-export MYSQL_LOCAL_HOME=./dbdata
+export MYSQL_LOCAL_HOME=./data-mysql
 export MYSQL_DATABASE=${WORDPRESS_DB_NAME}
 export MYSQL_USER=${WORDPRESS_DB_USER}
 export MYSQL_PASSWORD=${WORDPRESS_DB_PASSWORD}
@@ -77,7 +102,7 @@ export NGINX_LOGS=./logs/nginx
 # TBD
 ```
 
-Modify `nginx/default.conf` and replace `$host` and `8443` with your **Domain Name** and exposed **HTTPS Port** throughout the file
+Modify `nginx/default.conf` and replace `127.0.0.1` and `443` with your **Domain Name** and exposed **HTTPS Port** throughout the file
 
 ```conf
 # default.conf
@@ -85,17 +110,17 @@ Modify `nginx/default.conf` and replace `$host` and `8443` with your **Domain Na
 server {
     listen 80;
     listen [::]:80;
-    server_name $host;
+    server_name 127.0.0.1;
     location / {
         # update port as needed for host mapped https
-        rewrite ^ https://$host:8443$request_uri? permanent;
+        rewrite ^ https://127.0.0.1:443$request_uri? permanent;
     }
 }
 
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
-    server_name $host;
+    server_name 127.0.0.1;
     index index.php index.html index.htm;
     root /var/www/html;
     server_tokens off;
@@ -114,7 +139,7 @@ server {
     add_header X-XSS-Protection "1; mode=block" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header Referrer-Policy "no-referrer-when-downgrade" always;
-    add_header Content-Security-Policy "default-src * data: 'unsafe-eval' 'unsafe-inline'" always;
+    add_header Content-Security-Policy "default-src * data: 'unsafe-eval' 'unsafe-inline'; frame-src 'self' https: blob:;" always;
 
     location / {
         try_files $uri $uri/ /index.php$is_args$args;
@@ -157,9 +182,9 @@ Modify the `config/uploads.ini` file if the preset values are not to your liking
 
 ```ini
 file_uploads = On
-memory_limit = 256M
-upload_max_filesize = 75M
-post_max_size = 75M
+memory_limit = 2048M
+upload_max_filesize = 128M
+post_max_size = 128M
 max_execution_time = 600
 ```
 
@@ -188,25 +213,18 @@ Once configured the containers can be brought up using Docker Compose
     
     ```console
     $ docker-compose logs database
-    wp-database  | 2022-01-28 13:40:18+00:00 [Note] [Entrypoint]: Entrypoint script for MySQL Server 8.0.28-1debian10 started.
-    wp-database  | 2022-01-28 13:40:18+00:00 [Note] [Entrypoint]: Switching to dedicated user 'mysql'
-    wp-database  | 2022-01-28 13:40:18+00:00 [Note] [Entrypoint]: Entrypoint script for MySQL Server 8.0.28-1debian10 started.
-    wp-database  | 2022-01-28 13:40:18+00:00 [Note] [Entrypoint]: Initializing database files
+    wp-database  | 2024-12-19 03:17:39+00:00 [Note] [Entrypoint]: Entrypoint script for MySQL Server 8.4.3-1.el9 started.
+    wp-database  | 2024-12-19 03:17:40+00:00 [Note] [Entrypoint]: Switching to dedicated user 'mysql'
+    wp-database  | 2024-12-19 03:17:40+00:00 [Note] [Entrypoint]: Entrypoint script for MySQL Server 8.4.3-1.el9 started.
+    wp-database  | 2024-12-19 03:17:41+00:00 [Note] [Entrypoint]: Initializing database files
     ...
-    wp-database  | 2022-01-28 13:40:28+00:00 [Note] [Entrypoint]: Creating database wordpress
-    wp-database  | 2022-01-28 13:40:28+00:00 [Note] [Entrypoint]: Creating user wordpress
-    wp-database  | 2022-01-28 13:40:28+00:00 [Note] [Entrypoint]: Giving user wordpress access to schema wordpress
-    wp-database  |
-    wp-database  | 2022-01-28 13:40:28+00:00 [Note] [Entrypoint]: Stopping temporary server
-    wp-database  | 2022-01-28T13:40:29.002886Z 13 [System] [MY-013172] [Server] Received SHUTDOWN from user root. Shutting down mysqld (Version: 8.0.28).
-    wp-database  | 2022-01-28T13:40:30.226306Z 0 [System] [MY-010910] [Server] /usr/sbin/mysqld: Shutdown complete (mysqld 8.0.28)  MySQL Community Server - GPL.
-    wp-database  | 2022-01-28 13:40:31+00:00 [Note] [Entrypoint]: Temporary server stopped
-    wp-database  |
-    wp-database  | 2022-01-28 13:40:31+00:00 [Note] [Entrypoint]: MySQL init process done. Ready for start up.
-    wp-database  |
-    ...
-    wp-database  | 2022-01-28T13:40:32.061642Z 0 [System] [MY-011323] [Server] X Plugin ready for connections. Bind-address: '::' port: 33060, socket: /var/run/mysqld/mysqlx.sock
-    wp-database  | 2022-01-28T13:40:32.061790Z 0 [System] [MY-010931] [Server] /usr/sbin/mysqld: ready for connections. Version: '8.0.28'  socket: '/var/run/mysqld/mysqld.sock'  port: 3306  MySQL Community Server - GPL.
+    wp-database  | 2024-12-19T03:43:19.319027Z 0 [System] [MY-015015] [Server] MySQL Server - start.
+    wp-database  | 2024-12-19T03:43:19.521943Z 0 [System] [MY-010116] [Server] /usr/sbin/mysqld (mysqld 8.4.3) starting as process 1
+    wp-database  | 2024-12-19T03:43:20.189362Z 0 [Warning] [MY-010068] [Server] CA certificate ca.pem is self signed.
+    wp-database  | 2024-12-19T03:43:20.189406Z 0 [System] [MY-013602] [Server] Channel mysql_main configured to support TLS. Encrypted connections are now supported for this channel.
+    wp-database  | 2024-12-19T03:43:20.194993Z 0 [Warning] [MY-011810] [Server] Insecure configuration for --pid-file: Location '/var/run/mysqld' in the path is accessible to all OS users. Consider choosing a different directory.
+    wp-database  | 2024-12-19T03:43:20.223290Z 0 [System] [MY-010931] [Server] /usr/sbin/mysqld: ready for connections. Version: '8.4.3'  socket: '/var/run/mysqld/mysqld.sock'  port: 3306  MySQL Community Server - GPL.
+    wp-database  | 2024-12-19T03:43:20.223938Z 0 [System] [MY-011323] [Server] X Plugin ready for connections. Bind-address: '::' port: 33060, socket: /var/run/mysqld/mysqlx.sock
     ```
 
 3. Bring up the WordPress and Nginx containers
@@ -219,13 +237,14 @@ Once configured the containers can be brought up using Docker Compose
     
     ```console
     $ docker-compose ps
-    NAME                COMMAND                  SERVICE             STATUS              PORTS
-    wp-database         "docker-entrypoint.s…"   database            running             33060/tcp
-    wp-nginx            "/docker-entrypoint.…"   nginx               running             0.0.0.0:8080->80/tcp, 0.0.0.0:8443->443/tcp
-    wp-wordpress        "docker-entrypoint.s…"   wordpress           running             9000/tcp
+    NAME                 IMAGE                      COMMAND                  SERVICE     CREATED          STATUS          PORTS
+    cloudflared-tunnel   cloudflare/cloudflared     "cloudflared --no-au…"   tunnel      25 minutes ago   Up 11 seconds
+    wp-database          mysql:8.4.3                "docker-entrypoint.s…"   database    25 minutes ago   Up 11 seconds   3306/tcp, 33060/tcp
+    wp-nginx             nginx:1.27.3-alpine-slim   "/docker-entrypoint.…"   nginx       25 minutes ago   Up 11 seconds   0.0.0.0:80->80/tcp, :::80->80/tcp, 0.0.0.0:443-    >443/tcp, :::443->443/tcp
+    wp-wordpress         dpoon-wordpress:1.0        "docker-entrypoint.s…"   wordpress   25 minutes ago   Up 11 seconds   9000/tcp
     ```
 
-The WordPress application can be reached at the designated host and port (e.g. [https://127.0.0.1:8443]()).
+The WordPress application can be reached at the designated host and port (e.g. [https://127.0.0.1:443]()).
 
 - **NOTE**: you will likely have to acknowledge the security risk if using the included self-signed certificate.
 
@@ -268,7 +287,7 @@ $ docker-compose up -d adminer
  ⠿ Container wp-adminer   Started                                                                                                      0.9s
 ```
 
-Since Adminer is bypassing our Nginx configuration it will be running over HTTP in plain text on port 9000 (e.g. [http://127.0.0.1:9000/]())
+Since Adminer is bypassing our Nginx configuration it will be running over HTTP in plain text on port 9000 (e.g. [https://127.0.0.1:9000/]())
 
 ![](./imgs/WP-adminer.png)
 
@@ -305,34 +324,7 @@ For a complete teardown all containers must be stopped and removed along with th
 Commands
 
 ```console
-docker-compose stop
-docker-compose rm -fv
-docker-network rm wp-wordpress
-# removal calls may require sudo rights depending on file permissions
-rm -rf ./wordpress
-rm -rf ./dbdata
-rm -rf ./logs
-```
-
-Expected output
-
-```console
-$ docker-compose stop
-[+] Running 3/3
- ⠿ Container wp-nginx      Stopped                                                                                                     0.3s
- ⠿ Container wp-wordpress  Stopped                                                                                                     0.2s
- ⠿ Container wp-database   Stopped                                                                                                     0.8s
-$ docker-compose rm -fv
-Going to remove wp-nginx, wp-wordpress, wp-database
-[+] Running 3/0
- ⠿ Container wp-nginx      Removed                                                                                                     0.0s
- ⠿ Container wp-database   Removed                                                                                                     0.0s
- ⠿ Container wp-wordpress  Removed                                                                                                     0.0s
-$ docker network rm wp-wordpress
-wp-wordpress
-$ rm -rf ./wordpress
-$ rm -rf ./dbdata
-$ rm -rf ./logs
+% wipe-everything.sh
 ```
 
 ## <a name="references"></a>References
