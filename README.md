@@ -24,7 +24,7 @@
 That's it. You should be able to test it with https://127.0.0.1
 
 
-## The Detail
+## The Details
 
 Notes on deploying a single site [WordPress FPM Edition](https://hub.docker.com/_/wordpress/) instance as a docker deployment orchestrated by Docker Compose.
 
