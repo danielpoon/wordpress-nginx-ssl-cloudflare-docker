@@ -56,10 +56,13 @@ This variant contains PHP-FPM, which is a FastCGI implementation for PHP.
 
 ### <a name="reqts"></a>Host requirements
 
-Both Docker and Docker Compose are required on the host to run this code
-
-- Install Docker Engine: [https://docs.docker.com/engine/install/](https://docs.docker.com/engine/install/)
-- Install Docker Compose: [https://docs.docker.com/compose/install/](https://docs.docker.com/compose/install/)
+* Install [HomeBrew](https://brew.sh)
+* Install OrbStack. Orbstack is a faster & better version of Docker on MacOS
+```
+% brew install orbstack
+```
+* Install [GitHub Desktop for Mac](https://github.com/apps/desktop)
+  
 
 ## <a name="config"></a>Configuration
 
