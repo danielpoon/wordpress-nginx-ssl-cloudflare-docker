@@ -1,10 +1,10 @@
-# WordPress (FPM Edition) - Docker
+# WordPress on Docker / Nginx / Cloudflare Self Hosted
 
 Notes on deploying a single site [WordPress FPM Edition](https://hub.docker.com/_/wordpress/) instance as a docker deployment orchestrated by Docker Compose.
 
-- Use the FPM version of WordPress (v5-fpm)
-- Use MySQL as the database (v8)
-- Use Nginx as the web server (v1)
+- Use the FPM version of WordPress (WP 6.7.1 FPM on Alpine)
+- Use MySQL as the database (v8.4)
+- Use Nginx as the web server (v1.26)
 - Use Adminer as the database management tool (v4)
 - Include self-signed SSL certificate ([Let's Encrypt localhost](https://letsencrypt.org/docs/certificates-for-localhost/) format)
 
