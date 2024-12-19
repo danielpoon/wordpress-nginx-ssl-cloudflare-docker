@@ -307,6 +307,26 @@ After your install, you can add your themes and plugins. Some of the plugins tha
 - WP File Manager - able to view, archive, delete files I don't normally get to see in the front end e.g. staled plugin folders
 - WP-Optimize - Clean Compress Cache
 
+  Using WP-CLI which is something we added to the WP Docker image, we can add the plugins via commands, saving a ton of time not having to go to GUI
+
+```
+docker container ls
+docker exec -it <WORDPRESS CONTAINER ID> /bin/bash
+wp plugin install backup-backup --activate --allow-root
+wp plugin install classic-widgets-with-block-based-widgets --allow-root
+wp plugin install download-plugin --allow-root
+wp plugin install embed-pdf-viewer --allow-root
+wp plugin install falcon --allow-root
+wp plugin install olympus-google-fonts  --allow-root
+wp plugin install login-with-ajax --allow-root
+wp plugin install loginpress --allow-root
+wp plugin install phoenix-media-rename --allow-root
+wp plugin install print-my-blog --allow-root
+wp plugin install wp-smushit --allow-root
+wp plugin install wp-extended-search --allow-root
+wp plugin install wp-file-manager --allow-root
+wp plugin install wp-optimize --allow-root
+```
 
 ## <a name="adminer"></a>Adminer
 
