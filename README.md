@@ -1,24 +1,26 @@
-# WordPress on Docker / Nginx / Cloudflare Self-Hosted for MacOS M Series
+# WordPress on Docker / Nginx / Cloudflare 
+# Self-Hosted for MacOS M Series
 
 ## Quick Start
 
-* Install ([HomeBrew]([https://letsencrypt.org/docs/certificates-for-localhost/](https://brew.sh)) 
+* Install [HomeBrew](https://brew.sh)
 * Install OrbStack. This is a faster & better version of Docker on MacOS
 ```
 % brew install orbstack
 ```
-* Install ([GitHub Desktop for Mac](https://github.com/apps/desktop)) 
-* File | Clone Repository: ([This](https://github.com/danielpoon/wordpress-nginx-ssl-cloudflare-docker.git))
+* Install [GitHub Desktop for Mac](https://github.com/apps/desktop)
+* File | Clone Repository: ```https://github.com/danielpoon/wordpress-nginx-ssl-cloudflare-docker.git```
 * In a terminal:
 ```
 % cd ~/Documents/GitHub/wordpress-nginx-ssl-cloudflare-docker
 % cp env.template .env
 ```
 * Edit the .env file ```% nano .env```
-* Build and start the containers
+* Build and start the containers. using the start.sh and stop.sh will be faster than typing docker commands
 ```
 % sh ./start.sh
 ```
+
 ## The Detail
 
 Notes on deploying a single site [WordPress FPM Edition](https://hub.docker.com/_/wordpress/) instance as a docker deployment orchestrated by Docker Compose.
@@ -62,6 +64,8 @@ Both Docker and Docker Compose are required on the host to run this code
 ## <a name="config"></a>Configuration
 
 Copy the `env.template` file as `.env` and populate according to your environment. Make sure you enter your CloudFlare token.
+
+All the Wordpress and SQL data files are sitting locally e.g. ~/data-wordpess, instead of being inside each of the container.
 
 ```ini
 # docker-compose environment file
@@ -200,7 +204,7 @@ Once configured the containers can be brought up using Docker Compose
 
     ```console
     source .env
-    docker-compose pull
+    docker-compose build
     ```
 
 2. Bring up the Database and allow it a moment to create the WordPress user and database tables
