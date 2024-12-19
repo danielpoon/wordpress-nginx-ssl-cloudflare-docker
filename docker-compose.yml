@@ -2,7 +2,7 @@ services:
 
   wordpress:
     # default port 9000 (FastCGI)
-    image: wordpress:6.7.1-fpm-alpine
+    image: dpoon-wordpress:1.0
     container_name: wp-wordpress
     env_file:
       - .env
@@ -80,11 +80,6 @@ services:
     restart: unless-stopped
     command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
     network_mode: host
-
-  volumes:
-    ${MYSQL_LOCAL_HOME}: {}
-    ${WORDPRESS_LOCAL_HOME}: {}
-    ${NGINX_CONF}: {}
 
 networks:
   app-network:
